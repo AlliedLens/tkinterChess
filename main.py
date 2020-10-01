@@ -7,6 +7,8 @@
 # pawn reaching the end
 # castling
 # checkmate condition(not done)
+# pawn diagonal bug
+# king check moves shouldnt't be allowed
 
 from tkinter import *
 from tkinter import colorchooser
