@@ -1,14 +1,11 @@
-"""INCOMPLETE CASTLING AND PAWN GOING TO THE END OF THE THING AND TURNING INTO SOMETHING ELSE NOT DONE!!!!!!!!"""
+"""PAWN GOING TO END AND CHECKMATE WILL STAY INCOMPLETE FOR THE NEAR FUTURE."""
 
 # cd C:\Users\nellissery\Desktop\python code\Chess
 # python main.py
 
 # to do
-# pawn reaching the end
-# castling
+# castling (it works, but for some reason you have to double click, and an ineffective error is given)
 # checkmate condition(not done)
-# pawn diagonal bug
-# king check moves shouldnt't be allowed
 
 from tkinter import *
 from tkinter import colorchooser
@@ -109,17 +106,20 @@ def helenKeller():
     colours[1] = "black"
     colours[2] = "black"
     colours[3] = "black"
-    borderColour = "blue"
+    borderColour = "DarkSlateGrey"
     pass
+
 
 def colorSwap():
     global swap
     swap = True
 
+
 def haitian():
     global turn
     turn = "black"
     pass
+
 
 def theocratic():
     global theocracy
@@ -133,18 +133,42 @@ setup.mainloop()
 """....................Game Board........................."""
 
 # chess board variables
+
 activePiece = [] # the active piece, i.e with highlighted piece, egs :[1, 1, '#008000', '♟', '#510051']
 activePieceBool = "NoActivePiece" #/ "ActivePiece"
 cellList = [] # list that contains all the pieces and their attributes
 moves = [] # list that has the possible moves for a piece
 
 # chess Board Constants and bools
+
 justActivated = False # a bool designed specifically for the pieceActivate function, to make it so that the piece doesnt re-activate after it has moved
 turnChange = False # bool to check if the turn has been changed in one round
 coordList = [] # list with all the coordinates, note to self: xcoord is downward, while ycoord is vertical
-kingMoved = False
+kingMoved = False # to check if the king has moved, needed for castling
+castling = False
+
+# Lists of all possible moves
+
+# white
+wPawn = []
+wRook = []
+wPriest = []
+wKing = []
+wQueen = []
+wKnight = []
+wMoves = [wPawn, wPriest, wKing, wQueen, wKnight, wRook]
+
+# black
+bPawn = []
+bRook = []
+bPriest = []
+bKing = []
+bQueen = []
+bKnight = []
+bMoves = [bPawn, bPriest, bKing, bQueen, bKnight, bRook]
 
 # chess board class
+
 class Cell:
     def __init__(self, master, xCoord, yCoord, tileColour, pieceType, pieceColour, ACTIVE):
         global activePiece, cellList, activePieceBool, justActivated
@@ -175,7 +199,8 @@ class Cell:
         def blocked(x, y):
             global moves
             if pieceFromCoords(x,y)[4] != activePiece[4] and pieceFromCoords(x,y)[3] in "♔♝♞♚♖♛♟♜♘♗♕♔♙" :
-                moves.append((x,y))
+                if activePiece[3] not in "♙♟":
+                    moves.append((x,y))
                 return True # saying that the obj is blocked
             if pieceFromCoords(x,y)[4] == activePiece[4] and pieceFromCoords(x,y)[3] in "♔♝♞♚♖♛♟♜♘♗♕♙" and x in range(0,8) and y in range(0,8):
                 return True
@@ -185,16 +210,16 @@ class Cell:
         def pawnMove(xCoordTo, yCoordTo, xCoordFrom, yCoordFrom):
             global moves
             if activePiece[3] in  "♟":                 # black pawn
-                if xCoordFrom == 6 or xCoordFrom == 1:
+                if xCoordFrom == 6 or xCoordFrom == 1: # initial pos can have double step or single step
                     if not blocked(xCoordFrom + 2, yCoordFrom):
                         moves.append((xCoordFrom + 2, yCoordFrom))
                     if not blocked(xCoordFrom + 1, yCoordFrom):
-                        moves.append((xCoordFrom + 1, yCoordFrom))  
-                elif not blocked(xCoordFrom + 1, yCoordFrom):
                         moves.append((xCoordFrom + 1, yCoordFrom))
-                if pieceFromCoords(xCoordFrom + 1, yCoordFrom - 1)[4] != activePiece[4] and not blocked(xCoordFrom + 1, yCoordFrom - 1):
+                elif not blocked(xCoordFrom + 1, yCoordFrom): # for all other pos, single step
+                        moves.append((xCoordFrom + 1, yCoordFrom))
+                if pieceFromCoords(xCoordFrom + 1, yCoordFrom - 1)[4] != activePiece[4] and blocked(xCoordFrom + 1, yCoordFrom - 1):
                     moves.append((xCoordFrom + 1, yCoordFrom - 1))
-                if pieceFromCoords(xCoordFrom + 1, yCoordFrom + 1)[4] != activePiece[4] and not blocked(xCoordFrom + 1, yCoordFrom + 1):
+                if pieceFromCoords(xCoordFrom + 1, yCoordFrom + 1)[4] != activePiece[4] and blocked(xCoordFrom + 1, yCoordFrom + 1):
                     moves.append((xCoordFrom + 1, yCoordFrom + 1))
                 if (xCoordTo, yCoordTo) in moves:
                     moves = []
@@ -207,16 +232,16 @@ class Cell:
                         moves.append((xCoordFrom - 1, yCoordFrom))  
                 elif not blocked(xCoordFrom - 1, yCoordFrom):
                     moves.append((xCoordFrom - 1, yCoordFrom))
-                if pieceFromCoords(xCoordFrom - 1, yCoordFrom - 1)[4] != activePiece[4] and not blocked(xCoordFrom - 1, yCoordFrom - 1):
+                if pieceFromCoords(xCoordFrom - 1, yCoordFrom - 1)[4] != activePiece[4] and blocked(xCoordFrom - 1, yCoordFrom - 1):
                     moves.append((xCoordFrom - 1, yCoordFrom - 1))
-                if pieceFromCoords(xCoordFrom - 1, yCoordFrom + 1)[4] != activePiece[4] and not blocked(xCoordFrom - 1, yCoordFrom + 1):
+                if pieceFromCoords(xCoordFrom - 1, yCoordFrom + 1)[4] != activePiece[4] and blocked(xCoordFrom - 1, yCoordFrom + 1):
                     moves.append((xCoordFrom - 1, yCoordFrom + 1))
                 if (xCoordTo, yCoordTo) in moves:
                      moves = []
                      return True
 
         def rookMove(xCoordTo, yCoordTo, xCoordFrom, yCoordFrom):
-            global moves, coordList, run2
+            global moves, coordList, run2, bRook, wRook
             run = True
             while run == True:
                 i = 1
@@ -262,6 +287,7 @@ class Cell:
                 while (xCoordFrom + i) in range(0,8) and (yCoordFrom + i) in range(0,8) and not blocked(xCoordFrom + i, yCoordFrom + i):
                     moves.append((xCoordFrom + i, yCoordFrom + i))
                     i += 1  
+
                 i = 1
                 run = False
                 if (xCoordTo, yCoordTo) in moves:
@@ -334,7 +360,7 @@ class Cell:
                     return True
 
         def kingMove(xCoordTo, yCoordTo, xCoordFrom, yCoordFrom):
-            global moves, cellList, kingMoved
+            global moves, cellList, kingMoved, castling
             if xCoordFrom + 1 in range(0,8) and yCoordFrom + 1 in range(0,8) and not blocked(xCoordFrom + 1, yCoordFrom + 1):
                 moves.append((xCoordFrom + 1, yCoordFrom + 1))
             if xCoordFrom + 1 in range(0,8) and yCoordFrom - 1 in range(0,8) and not blocked(xCoordFrom - 1, yCoordFrom - 1):
@@ -353,27 +379,42 @@ class Cell:
                 moves.append((xCoordFrom, yCoordFrom - 1))
             if not kingMoved:
                 if activePiece[3] == "♚":
-                    if (xCoordTo, yCoordTo) == (0,0):
-                        pass
-                    if (xCoordTo, yCoordTo) == (0,7):
-                        pass
+                    if  (xCoordTo, yCoordTo) == (0,6) and not blocked(0,5) and not blocked(0,6) and pieceFromCoords(0,7)[3] == "♜":       
+                        pieceFromCoords(0,6)[3] = "♚"
+                        pieceFromCoords(0,5)[3] = "♜"
+                        pieceFromCoords(0,7)[3] = "\u2003"
+                        pieceFromCoords(0,4)[3] = "\u2003"
+                        castling = True
+                        return True
+                    if (xCoordTo, yCoordTo) == (0,1) and not blocked(0,1) and not blocked(0,2) and not blocked(0,3) and pieceFromCoords(0,0)[3] == "♜":
+                        pieceFromCoords(0,1)[3] = "♚"
+                        pieceFromCoords(0,2)[3] = "♜"
+                        pieceFromCoords(0,0)[3] = "\u2003"
+                        pieceFromCoords(0,4)[3] = "\u2003"
+                        castling = True
+                        return True
                 if activePiece[3] == "♔":
                     if  (xCoordTo, yCoordTo) == (7,6) and not blocked(7,5) and not blocked(7,6) and pieceFromCoords(7,7)[3] == "♖":       
                         pieceFromCoords(7,6)[3] = "♔"
                         pieceFromCoords(7,5)[3] = "♖"
                         pieceFromCoords(7,7)[3] = "\u2003"
                         pieceFromCoords(7,4)[3] = "\u2003"
-                        baseReDraw()
-                    if (xCoordTo, yCoordTo) == (7,0):
-                        pass
-
+                        castling = True
+                        return True
+                    if (xCoordTo, yCoordTo) == (7,1) and not blocked(7,1) and not blocked(7,2) and not blocked(7,3) and pieceFromCoords(7,0)[3] == "♖":                       
+                        pieceFromCoords(7,1)[3] = "♔"
+                        pieceFromCoords(7,2)[3] = "♖"
+                        pieceFromCoords(7,0)[3] = "\u2003"
+                        pieceFromCoords(7,4)[3] = "\u2003"
+                        castling = True
+                        return True
             if (xCoordTo, yCoordTo) in moves:
                     kingMoved = True
                     moves = []
                     return True
 
         def availableMove(xCoordTo, yCoordTo, xCoordFrom, yCoordFrom): # func that checks if anything is blocking the piece, and if it is folllowing piece rules
-            global moves
+            global moves, castling
             coordList = []
             [coordList.append((i[0], i[1])) for i in cellList]
             moves = []
@@ -398,7 +439,7 @@ class Cell:
                 return True
 
         def pieceMovement(event=None):
-            global activePiece, activePieceBool, justActivated, turn, turnChange
+            global activePiece, activePieceBool, justActivated, turn, turnChange, castling
             if turn == "white":                                                  
                 if pieceType in "♙♖♗♘♕♔" and activePieceBool == "NoActivePiece":
                     activePiece = pieceFromCoords(currentCellCoord[0], currentCellCoord[1])
@@ -413,7 +454,20 @@ class Cell:
             if activePieceBool == "ActivePiece" and not justActivated:
                 clickedPiece = pieceFromCoords(currentCellCoord[0], currentCellCoord[1])
                 print(clickedPiece)
-                if clickedPiece[3] != "\u2003" and clickedPiece[4] != activePiece[4] and availableMove(currentCellCoord[0], currentCellCoord[1], activePiece[0], activePiece[1]): # for an opponent clicked cell
+                if castling:
+                    activePiece = []
+                    activePieceBool = "NoActivePiece"
+                    if turn == "white" and not turnChange:
+                        turn = "black"
+                        turnChange = True
+                    if turn == "black" and not turnChange:
+                        turn = "white"
+                        turnChange = True
+                    turnChange = False                       
+                    castling = False
+                    baseReDraw()
+                    print(len(cellList))
+                if clickedPiece[3] != "\u2003" and clickedPiece[4] != activePiece[4] and availableMove(currentCellCoord[0], currentCellCoord[1], activePiece[0], activePiece[1]) and not castling: # for an opponent clicked cell
                     clickedPiece[3] = activePiece[3]
                     clickedPiece[4] = activePiece[4]
                     activePiece[3] = "\u2003"
@@ -427,7 +481,7 @@ class Cell:
                         turnChange = True
                     turnChange = False      
                     baseReDraw()
-                if clickedPiece[3] == "\u2003" and availableMove(currentCellCoord[0], currentCellCoord[1], activePiece[0], activePiece[1]):  # for a blank clicked cell
+                if clickedPiece[3] == "\u2003" and availableMove(currentCellCoord[0], currentCellCoord[1], activePiece[0], activePiece[1]) and not castling:  # for a blank clicked cell
                     clickedPiece[3] = activePiece[3]
                     clickedPiece[4] = activePiece[4]
                     activePiece[3] = "\u2003"
@@ -441,7 +495,6 @@ class Cell:
                         turnChange = True
                     turnChange = False                           
                     baseReDraw()
-
             justActivated = False
 
         def pieceDeactivate(event=None):
@@ -543,11 +596,9 @@ def baseReDraw():
     if not swap:
         for cell in cellList:
             Cell(boardPanel, cell[0], cell[1], cell[2], cell[3], cell[4], False)
-            print(cell)
     else:
         for cell in cellList:
             x = False
-            y = False
             # [7, 0, '#ffff00', '♖', '#0000ff']
             if cell[2] == colours[0] and not x:
                 cell[2] = colours[1]
@@ -555,14 +606,7 @@ def baseReDraw():
             if cell[2] == colours[1] and not x:
                 cell[2] = colours[0]
                 x = True
-            x = False
-            if cell[4] == colours[2] and not y:
-                cell[4] = colours[3]
-                y = True
-            if cell[4] == colours[3] and not y:
-                cell[4] = colours[2]
-                y = True
-            y = False                
+            x = False               
             Cell(boardPanel, cell[0], cell[1], cell[2], cell[3], cell[4], False)
 
 
